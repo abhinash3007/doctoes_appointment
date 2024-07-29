@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema({
         required: [true, "AADHAR number is required"],
         validate: {
             validator: function(v) {
-                return /^\d{12}$/.test(v); // Check if AADHAR number has 12 digits
+                return /^\d{12}$/.test(v); 
             },
             message: "AADHAR number must contain 12 digits",
         },
@@ -54,7 +54,7 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         required: true,
-        enum: ["Admin", "Patient"],
+        enum: ["Admin", "Patient","Doctor"],
     },
     doctorDepartment: {
         type: String,
@@ -65,7 +65,6 @@ const userSchema = new mongoose.Schema({
     },
 });
 
-// Hash the password before saving the user
 userSchema.pre('save', async function(next) {
     if (!this.isModified('password')) {
         return next();

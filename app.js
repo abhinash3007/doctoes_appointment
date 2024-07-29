@@ -5,10 +5,10 @@ const fileUpload = require('express-fileupload');
 const dotenv = require('dotenv');
 dotenv.config({ path: './config/config.env' });
 
-const messageRoutes = require('./routes/messageRoutes');
+const messageRoutes = require('./router/messageRoutes');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 const { ErrorHandler } = errorMiddleware;
-
+const userRouter=require("./router/userRouter");
 const app = express();
 
 app.use(cors({
@@ -26,6 +26,7 @@ app.use(fileUpload({
 }));
 
 app.use('/api/message', messageRoutes);
+app.use('/api/user', userRouter);
 app.use(errorMiddleware);
 
 require('./config/mongoose-connection');
