@@ -121,55 +121,68 @@ module.exports.logoutUser = catchAsyncErrors(async (req, res, next) => {
     });
 });
 module.exports.addNewDoctor = catchAsyncErrors(async (req, res, next) => {
-    if (!req.files || !req.files.docAvatar) {
-      return next(new ErrorHandler("Doctor avatar is required!", 400));
+    if (!req.files || Object.keys(req.files).length === 0) {
+        return next(new ErrorHandler("Doctor Avatar Required!", 400));
     }
-  
+
     const { docAvatar } = req.files;
     const allowedFormats = ["image/png", "image/jpeg", "image/webp"];
     if (!allowedFormats.includes(docAvatar.mimetype)) {
-      return next(new ErrorHandler("File format not supported!", 400));
+        return next(new ErrorHandler("File Format Not Supported!", 400));
     }
-  
+
     const { firstName, lastName, email, phone, password, dob, aadhar_card_no, gender, doctorDepartment } = req.body;
-    if (!firstName || !lastName || !email || !phone || !dob || !aadhar_card_no || !gender || !password || !doctorDepartment) {
-      return next(new ErrorHandler("Please provide the full details!", 400));
+    
+    // Check for missing fields
+    const missingFields = [];
+    if (!firstName) missingFields.push("firstName");
+    if (!lastName) missingFields.push("lastName");
+    if (!email) missingFields.push("email");
+    if (!phone) missingFields.push("phone");
+    if (!password) missingFields.push("password");
+    if (!dob) missingFields.push("dob");
+    if (!aadhar_card_no) missingFields.push("aadhar_card_no");
+    if (!gender) missingFields.push("gender");
+    if (!doctorDepartment) missingFields.push("doctorDepartment");
+
+    if (missingFields.length > 0) {
+        return next(new ErrorHandler(`Please provide the full details! Missing fields: ${missingFields.join(", ")}`, 400));
     }
-  
+
     const isRegistered = await User.findOne({ email });
     if (isRegistered) {
-      return next(new ErrorHandler(`${isRegistered.role} with this email already exists!`, 400));
+        return next(new ErrorHandler(`${isRegistered.role} with this email already exists!`, 400));
     }
-  
+
     const cloudinaryResponse = await cloudinary.uploader.upload(docAvatar.tempFilePath, {
-      folder: "doctor_avatars",
+        folder: "doctor_avatars",
     });
-  
+
     if (!cloudinaryResponse || cloudinaryResponse.error) {
-      console.error("Cloudinary error:", cloudinaryResponse.error || "unknown error");
-      return next(new ErrorHandler("Failed to upload doctor avatar to Cloudinary", 500));
+        console.error("Cloudinary error:", cloudinaryResponse.error || "unknown error");
+        return next(new ErrorHandler("Failed to upload doctor avatar to Cloudinary", 500));
     }
-  
+
     const doctor = await User.create({
-      firstName,
-      lastName,
-      email,
-      phone,
-      dob,
-      aadhar_card_no,
-      gender,
-      password,
-      role: "Doctor",
-      doctorDepartment,
-      docAvatar: {
-        public_id: cloudinaryResponse.public_id,
-        url: cloudinaryResponse.secure_url,
-      },
+        firstName,
+        lastName,
+        email,
+        phone,
+        dob,
+        aadhar_card_no,
+        gender,
+        password,
+        role: "Doctor",
+        doctorDepartment,
+        docAvatar: {
+            public_id: cloudinaryResponse.public_id,
+            url: cloudinaryResponse.secure_url,
+        },
     });
-  
+
     res.status(200).json({
-      success: true,
-      message: "New Doctor Registered",
-      doctor,
+        success: true,
+        message: "New Doctor Registered",
+        doctor,
     });
-  });
+});

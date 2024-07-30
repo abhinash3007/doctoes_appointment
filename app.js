@@ -9,6 +9,7 @@ const messageRoutes = require('./router/messageRoutes');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 const { ErrorHandler } = errorMiddleware;
 const userRouter=require("./router/userRouter");
+const appointmentRouter=require("./router/appointmentRouter");
 const app = express();
 
 app.use(cors({
@@ -18,7 +19,7 @@ app.use(cors({
 }));
 
 app.use(cookieParser());
-app.use(express.json()); // Middleware for parsing JSON bodies
+app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
 app.use(fileUpload({
     useTempFiles: true,
@@ -27,6 +28,8 @@ app.use(fileUpload({
 
 app.use('/api/message', messageRoutes);
 app.use('/api/user', userRouter);
+app.use('/api/appointment', appointmentRouter);
+
 app.use(errorMiddleware);
 
 require('./config/mongoose-connection');

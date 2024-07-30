@@ -24,7 +24,7 @@ module.exports.isAuthenticatedPatient = catchAsyncErrors(async (req, res, next) 
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
     req.user = await User.findById(decoded.id);
     if (req.user.role !== 'Patient') {
-        return next(new ErrorHandler('Access denied, not an ${req.user.role}', 403));
+        return next(new ErrorHandler(`Access denied, not a Patient`, 403));
     }
     next();
-})
+});
