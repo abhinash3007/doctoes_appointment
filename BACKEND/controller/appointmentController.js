@@ -61,7 +61,7 @@ module.exports.getAllApponitments=catchAsyncErrors(async(req,res,next)=>{
 module.exports.updateApppointment=catchAsyncErrors(async(req,res,next)=>{
     let appointment=await Appointment.findById(req.params.id);
     if(!appointment){
-        return next(new ErrorHandler("Appointment not found",400));
+        return next(new ErrorHandler("Appointment not found",404));
     }
     appointment=await Appointment.findByIdAndUpdate(req.params.id,req.body,{
         new:true,
@@ -74,4 +74,16 @@ module.exports.updateApppointment=catchAsyncErrors(async(req,res,next)=>{
         appointment,
     });
 });
+
+module.exports.deleteAppointment=catchAsyncErrors(async(req,res,next)=>{
+    const appointment=await Appointment.findById(req.params.id);
+    if(!appointment){
+        return next(new ErrorHandler("No appointment found",404));
+    }
+    await appointment.deleteOne();
+    res.status(200).json({
+        success: true,
+        message: "Appointment deleted successfully",
+    })
+})
 
